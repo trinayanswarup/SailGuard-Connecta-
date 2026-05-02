@@ -11,10 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.sailguard.app.ui.theme.TextPrimary
 import com.sailguard.app.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
 
@@ -26,22 +24,22 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
     }
 
     Box(
-        modifier         = Modifier.fillMaxSize().background(Color.White),
+        modifier         = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("⛵", fontSize = 72.sp)
             Text(
-                text       = "SailGuard",
-                style      = MaterialTheme.typography.headlineLarge,
-                color      = Color(0xFF0D0D0D),
-                fontWeight = FontWeight.Bold
+                text  = "SailGuard",
+                style = MaterialTheme.typography.displaySmall,
+                color = TextPrimary
             )
             Text(
-                text  = "Smart Travel Data",
+                text  = "Your smart travel companion",
                 style = MaterialTheme.typography.bodyLarge,
                 color = TextSecondary
             )

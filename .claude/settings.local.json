@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"D:\\\\AndroidStudioProjects\\\\SailGuard\" -Recurse -Force)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}
