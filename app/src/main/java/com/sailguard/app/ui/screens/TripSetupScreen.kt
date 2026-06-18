@@ -193,6 +193,10 @@ private fun Step1Content(
     state: com.sailguard.app.viewmodel.TripSetupState,
     vm:    TripViewModel
 ) {
+    val linkCode       by vm.linkCode.collectAsState()
+    var linkExpanded   by rememberSaveable { mutableStateOf(false) }
+    var linkCodeInput  by rememberSaveable { mutableStateOf(linkCode ?: "") }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -288,6 +292,82 @@ private fun Step1Content(
                 }
             }
         }
+
+        // ── Link to Connecta (optional) ───────────────────────────────────────
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionLabel("Link to Connecta (optional)")
+            Card(
+                colors = CardDefaults.cardColors(containerColor = AppSurface),
+                shape  = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, if (linkCode != null) SailyYellow.copy(alpha = 0.5f) else CardBorder)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { linkExpanded = !linkExpanded }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment     = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                if (linkCode != null) "Session ID linked" else "Not linked",
+                                style      = MaterialTheme.typography.titleSmall,
+                                color      = if (linkCode != null) SailyYellow else TextPrimary,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "Sync trips to Connecta web dashboard",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextSecondary
+                            )
+                        }
+                        Icon(
+                            imageVector        = if (linkExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                            contentDescription = null,
+                            tint               = TextSecondary,
+                            modifier           = Modifier.size(20.dp)
+                        )
+                    }
+                    AnimatedVisibility(
+                        visible = linkExpanded,
+                        enter   = expandVertically() + fadeIn(),
+                        exit    = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
+                            modifier            = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            OutlinedTextField(
+                                value         = linkCodeInput,
+                                onValueChange = {
+                                    linkCodeInput = it
+                                    vm.setLinkCode(it)
+                                },
+                                placeholder   = { Text("Paste connecta_session_id here", color = TextSecondary) },
+                                modifier      = Modifier.fillMaxWidth(),
+                                singleLine    = true,
+                                colors        = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor        = TextPrimary,
+                                    unfocusedTextColor      = TextPrimary,
+                                    focusedBorderColor      = SailyYellow,
+                                    unfocusedBorderColor    = CardBorder,
+                                    focusedContainerColor   = AppSurface,
+                                    unfocusedContainerColor = AppSurface
+                                )
+                            )
+                            Text(
+                                "Find this in Connecta web app → Settings → Session ID",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         Spacer(Modifier.height(8.dp))
     }
 }

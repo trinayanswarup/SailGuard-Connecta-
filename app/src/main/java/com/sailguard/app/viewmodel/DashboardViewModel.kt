@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.max
@@ -58,10 +59,15 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
     // ── Trip binding ──────────────────────────────────────────────────────────
 
     fun bindTrip(trip: TripConfig) {
-        // FIX: skip full reset if the same trip is already active (prevents
-        // usedGb/polling reset every time the Dashboard tab is revisited).
+        // Skip full reset if the same trip is already active, but propagate
+        // connectaTripId if it just arrived from the Connecta backend.
         if (_state.value.trip?.startTimestamp == trip.startTimestamp &&
-            _state.value.tripStartTimeMs != 0L) return
+            _state.value.tripStartTimeMs != 0L) {
+            if (_state.value.trip?.connectaTripId != trip.connectaTripId) {
+                _state.value = _state.value.copy(trip = trip)
+            }
+            return
+        }
 
         pollingJob?.cancel()
         baselineBytes = readMobileBytes()
@@ -164,6 +170,21 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
         _state.value  = _state.value.copy(usedGb = usedGb)
         recomputeRisk()
         checkAndAddAlerts()
+        pushUsageSnapshot(usedGb)
+    }
+
+    private fun pushUsageSnapshot(usedGb: Double) {
+        val tripId  = _state.value.trip?.connectaTripId ?: return
+        val battery = _state.value.deviceStatus.batteryLevel
+        val network = _state.value.deviceStatus.networkType
+        viewModelScope.launch(Dispatchers.IO) {
+            com.sailguard.app.data.network.ConnectaApiClient.submitUsageSnapshot(
+                connectaTripId = tripId,
+                dataUsedMb     = usedGb * 1024.0,
+                batteryPct     = battery,
+                networkType    = network
+            )
+        }
     }
 
     private fun recomputeRisk() {

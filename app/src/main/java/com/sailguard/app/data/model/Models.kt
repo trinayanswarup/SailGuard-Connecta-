@@ -31,7 +31,8 @@ data class TripConfig(
     val durationDays: Int,
     val usageStyle: UsageStyle,
     val selectedPlan: SailyPlan,
-    val startTimestamp: Long = System.currentTimeMillis()
+    val startTimestamp: Long = System.currentTimeMillis(),
+    val connectaTripId: String? = null
 )
 
 // ── Alerts ────────────────────────────────────────────────────────────────────

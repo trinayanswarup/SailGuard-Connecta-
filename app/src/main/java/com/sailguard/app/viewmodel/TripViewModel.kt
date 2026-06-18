@@ -1,38 +1,52 @@
 package com.sailguard.app.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.sailguard.app.data.model.Alert
 import com.sailguard.app.data.model.AlertSeverity
 import com.sailguard.app.data.model.SailyPlan
 import com.sailguard.app.data.model.TripConfig
 import com.sailguard.app.data.model.UsageStyle
+import com.sailguard.app.data.network.ConnectaApiClient
 import com.sailguard.app.data.repository.PlanRepository
 import com.sailguard.app.data.repository.Region
+import com.sailguard.app.data.repository.SettingsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 data class TripSetupState(
-    val destination: String   = "",
-    val flag: String          = "",
-    val durationDays: Int     = 7,
+    val destination: String    = "",
+    val flag: String           = "",
+    val durationDays: Int      = 7,
     val usageStyle: UsageStyle = UsageStyle.MEDIUM,
-    val suggestedPlan: SailyPlan? = null,
-    val selectedPlan: SailyPlan?  = null,
+    val suggestedPlan: SailyPlan?    = null,
+    val selectedPlan: SailyPlan?     = null,
     val availablePlans: List<SailyPlan> = emptyList(),
     val tripStarted: Boolean   = false,
     val activeTrip: TripConfig? = null,
     val selectedRegion: Region? = null
 )
 
-class TripViewModel : ViewModel() {
+class TripViewModel(app: Application) : AndroidViewModel(app) {
+
+    private val settings = SettingsRepository(app)
 
     private val _state = MutableStateFlow(TripSetupState())
     val state: StateFlow<TripSetupState> = _state.asStateFlow()
 
     private val _alerts = MutableStateFlow<List<Alert>>(emptyList())
     val alerts: StateFlow<List<Alert>> = _alerts.asStateFlow()
+
+    private val _linkCode = MutableStateFlow(settings.connectaLinkCode)
+    val linkCode: StateFlow<String?> = _linkCode.asStateFlow()
 
     // ── Setup mutations ───────────────────────────────────────────────────────
 
@@ -93,6 +107,12 @@ class TripViewModel : ViewModel() {
         _state.value = _state.value.copy(selectedPlan = plan)
     }
 
+    fun setLinkCode(code: String) {
+        val trimmed = code.trim()
+        settings.connectaLinkCode = trimmed.ifEmpty { null }
+        _linkCode.value = trimmed.ifEmpty { null }
+    }
+
     // ── Trip lifecycle ────────────────────────────────────────────────────────
 
     fun startTrip() {
@@ -108,6 +128,38 @@ class TripViewModel : ViewModel() {
         )
         _state.value = _state.value.copy(tripStarted = true, activeTrip = trip)
         generateInitialAlerts(trip)
+        confirmTripWithConnecta(trip)
+    }
+
+    private fun confirmTripWithConnecta(trip: TripConfig) {
+        val sessionId = settings.connectaLinkCode
+        if (sessionId.isNullOrBlank()) return
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val fmt   = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            val today = System.currentTimeMillis()
+            val endMs = today + trip.durationDays * 86_400_000L
+
+            val tripId = ConnectaApiClient.confirmNewTrip(
+                sessionId   = sessionId,
+                destination = trip.destination,
+                startDate   = fmt.format(Date(today)),
+                endDate     = fmt.format(Date(endMs)),
+                plan = ConnectaApiClient.ConfirmedPlan(
+                    provider     = "Saily",
+                    name         = trip.selectedPlan.id,
+                    priceUsd     = trip.selectedPlan.priceUSD,
+                    dataLabel    = if (trip.selectedPlan.isUnlimited) "Unlimited"
+                                   else "${trip.selectedPlan.dataGB} GB",
+                    validityDays = trip.selectedPlan.validDays
+                )
+            )
+            if (tripId != null) {
+                _state.value = _state.value.copy(
+                    activeTrip = _state.value.activeTrip?.copy(connectaTripId = tripId)
+                )
+            }
+        }
     }
 
     fun resetTrip() {
@@ -122,8 +174,8 @@ class TripViewModel : ViewModel() {
     }
 
     private fun generateInitialAlerts(trip: TripConfig) {
-        val needed   = trip.usageStyle.dailyGb * trip.durationDays
-        val planGb   = trip.selectedPlan.dataGB
+        val needed    = trip.usageStyle.dailyGb * trip.durationDays
+        val planGb    = trip.selectedPlan.dataGB
         val newAlerts = mutableListOf<Alert>()
 
         if (planGb < needed) {
