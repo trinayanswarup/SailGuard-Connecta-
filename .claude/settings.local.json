@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"D:\\\\AndroidStudioProjects\\\\SailGuard\" -Recurse -Force)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(./gradlew assembleDebug --no-daemon)",
+      "PowerShell(& \".\\\\gradlew.bat\" assembleDebug --no-daemon 2>&1 | Select-Object -Last 40)",
+      "PowerShell([System.IO.Directory]::GetDirectories\\(\"C:\\\\Android\\\\Sdk\"\\) | ForEach-Object { [System.IO.Path]::GetFileName\\($_\\) })",
+      "PowerShell([System.IO.Directory]::GetDirectories\\(\"D:\\\\\"\\) | ForEach-Object { [System.IO.Path]::GetFileName\\($_\\) })",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell($studioPath = \\(Get-ItemProperty \"HKCU:\\\\Software\\\\Google\\\\Android Studio\" -ErrorAction SilentlyContinue\\).InstallLocation; Write-Output \"Studio: $studioPath\"; \\(Get-Command java -ErrorAction SilentlyContinue\\).Source)",
+      "PowerShell($env:JAVA_HOME = \"D:\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location \"D:\\\\AndroidStudioProjects\\\\SailGuard\"; .\\\\gradlew.bat assembleDebug 2>&1 | Select-Object -Last 25)",
+      "PowerShell($env:JAVA_HOME = \"D:\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location \"D:\\\\AndroidStudioProjects\\\\SailGuard\"; .\\\\gradlew.bat assembleDebug 2>&1 | Select-Object -Last 10)",
+      "PowerShell($env:JAVA_HOME = \"D:\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location \"D:\\\\AndroidStudioProjects\\\\SailGuard\"; .\\\\gradlew.bat assembleDebug 2>&1 | Select-Object -Last 15)",
+      "PowerShell($env:JAVA_HOME = \"D:\\\\Android Studio\\\\jbr\"; cd \"D:\\\\AndroidStudioProjects\\\\SailGuard\"; .\\\\gradlew assembleDebug 2>&1 | Select-Object -Last 30)"
     ]
   }
 }
