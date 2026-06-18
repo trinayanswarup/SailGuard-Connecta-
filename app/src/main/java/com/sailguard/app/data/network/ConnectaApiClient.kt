@@ -36,6 +36,19 @@ object ConnectaApiClient {
         val validityDays: Int
     )
 
+    data class SyncedTrip(
+        val id: String,
+        val destination: String,
+        val startDate: String,
+        val endDate: String,
+        val confirmedAt: String?,
+        val planName: String?,
+        val planProvider: String?,
+        val priceUsd: Double?,
+        val dataLabel: String?,
+        val validityDays: Int?
+    )
+
     /** Creates AND confirms a new trip in one step. Returns the new Connecta tripId on success, null on any failure. */
     fun confirmNewTrip(
         sessionId: String,
@@ -101,6 +114,54 @@ object ConnectaApiClient {
         }
 
         post(body)
+    }
+
+    /** Every trip tied to this session on Connecta's backend — including ones confirmed
+     *  purely from the web checkout, which SailGuard never created locally.
+     *  Returns empty list on any failure, never throws. */
+    fun fetchTripsBySession(sessionId: String): List<SyncedTrip> {
+        val query = """
+            query TripsBySession(${'$'}sessionId: String!) {
+              tripsBySession(sessionId: ${'$'}sessionId) {
+                id
+                destination
+                startDate
+                endDate
+                confirmedAt
+                confirmedPlan { provider name priceUsd dataLabel validityDays }
+              }
+            }
+        """.trimIndent()
+
+        val body = JSONObject().apply {
+            put("query", query)
+            put("variables", JSONObject().put("sessionId", sessionId))
+        }
+
+        val response = post(body) ?: return emptyList()
+        val tripsArray = response.optJSONObject("data")
+            ?.optJSONArray("tripsBySession") ?: return emptyList()
+
+        val result = mutableListOf<SyncedTrip>()
+        for (i in 0 until tripsArray.length()) {
+            val t = tripsArray.optJSONObject(i) ?: continue
+            val plan = t.optJSONObject("confirmedPlan")
+            result.add(
+                SyncedTrip(
+                    id           = t.optString("id"),
+                    destination  = t.optString("destination"),
+                    startDate    = t.optString("startDate"),
+                    endDate      = t.optString("endDate"),
+                    confirmedAt  = t.optString("confirmedAt").takeIf { it.isNotBlank() && it != "null" },
+                    planName     = plan?.optString("name"),
+                    planProvider = plan?.optString("provider"),
+                    priceUsd     = plan?.optDouble("priceUsd"),
+                    dataLabel    = plan?.optString("dataLabel"),
+                    validityDays = plan?.optInt("validityDays")
+                )
+            )
+        }
+        return result
     }
 
     private fun post(body: JSONObject): JSONObject? {

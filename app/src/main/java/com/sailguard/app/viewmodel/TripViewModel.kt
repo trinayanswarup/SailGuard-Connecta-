@@ -60,46 +60,41 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             selectedRegion = null,
             availablePlans = plans,
             suggestedPlan  = suggested,
-            selectedPlan   = suggested
+            selectedPlan   = null
         )
     }
 
     fun setRegion(region: Region) {
         val plans     = PlanRepository.getRegionalPlans(region)
-        val suggested = plans.filter { !it.isUnlimited }.minByOrNull { it.priceUSD }
+        val suggested = PlanRepository.suggestPlan(
+            PlanRepository.regionDisplayName(region), _state.value.durationDays, _state.value.usageStyle)
         _state.value  = _state.value.copy(
             destination    = PlanRepository.regionDisplayName(region),
             flag           = region.emoji,
             selectedRegion = region,
             availablePlans = plans,
             suggestedPlan  = suggested,
-            selectedPlan   = suggested
+            selectedPlan   = null
         )
     }
 
     fun setDuration(days: Int) {
         val s         = _state.value
-        val suggested = if (s.selectedRegion != null)
-            s.availablePlans.filter { !it.isUnlimited }.minByOrNull { it.priceUSD }
-        else
-            PlanRepository.suggestPlan(s.destination, days, s.usageStyle)
+        val suggested = PlanRepository.suggestPlan(s.destination, days, s.usageStyle)
         _state.value  = s.copy(
             durationDays  = days,
             suggestedPlan = suggested,
-            selectedPlan  = suggested
+            selectedPlan  = null
         )
     }
 
     fun setUsageStyle(style: UsageStyle) {
         val s         = _state.value
-        val suggested = if (s.selectedRegion != null)
-            s.availablePlans.filter { !it.isUnlimited }.minByOrNull { it.priceUSD }
-        else
-            PlanRepository.suggestPlan(s.destination, s.durationDays, style)
+        val suggested = PlanRepository.suggestPlan(s.destination, s.durationDays, style)
         _state.value  = s.copy(
             usageStyle    = style,
             suggestedPlan = suggested,
-            selectedPlan  = suggested
+            selectedPlan  = null
         )
     }
 
@@ -117,7 +112,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
     fun startTrip() {
         val s    = _state.value
-        val plan = s.selectedPlan ?: return
+        val plan = s.selectedPlan ?: s.suggestedPlan ?: return
         val trip = TripConfig(
             destination  = s.destination,
             countryCode  = plan.countryCode,
@@ -146,7 +141,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                 startDate   = fmt.format(Date(today)),
                 endDate     = fmt.format(Date(endMs)),
                 plan = ConnectaApiClient.ConfirmedPlan(
-                    provider     = "Saily",
+                    provider     = "Connecta Local",
                     name         = trip.selectedPlan.id,
                     priceUsd     = trip.selectedPlan.priceUSD,
                     dataLabel    = if (trip.selectedPlan.isUnlimited) "Unlimited"
@@ -191,7 +186,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             newAlerts += Alert(
                 id       = UUID.randomUUID().toString(),
                 title    = "Trip Started",
-                message  = "${trip.flag} ${trip.destination} · ${planGb}GB Saily plan active for ${trip.durationDays} days.",
+                message  = "${trip.flag} ${trip.destination} · ${planGb}GB Connecta plan active for ${trip.durationDays} days.",
                 severity = AlertSeverity.INFO
             )
         }

@@ -49,7 +49,7 @@ import com.sailguard.app.ui.theme.AppBackground
 import com.sailguard.app.ui.theme.AppSurface
 import com.sailguard.app.ui.theme.CardBorder
 import com.sailguard.app.ui.theme.SailGuardTheme
-import com.sailguard.app.ui.theme.SailyYellow
+import com.sailguard.app.ui.theme.ConnectaOrange
 import com.sailguard.app.ui.theme.TextSecondary
 import com.sailguard.app.viewmodel.DashboardViewModel
 import com.sailguard.app.viewmodel.HistoryViewModel
@@ -101,7 +101,7 @@ private fun SailGuardApp(
                     snackbarData   = data,
                     containerColor = Color(0xFF1A1A1A),
                     contentColor   = Color.White,
-                    actionColor    = SailyYellow
+                    actionColor    = ConnectaOrange
                 )
             }
         },

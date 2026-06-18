@@ -39,7 +39,7 @@ import com.sailguard.app.ui.theme.AppBackground
 import com.sailguard.app.ui.theme.AppSurface
 import com.sailguard.app.ui.theme.CardBorder
 import com.sailguard.app.ui.theme.NearBlack
-import com.sailguard.app.ui.theme.SailyYellow
+import com.sailguard.app.ui.theme.ConnectaOrange
 import com.sailguard.app.ui.theme.SuccessGreen
 import com.sailguard.app.ui.theme.TextPrimary
 import com.sailguard.app.ui.theme.TextSecondary
@@ -72,7 +72,7 @@ fun CartScreen(
                      style      = MaterialTheme.typography.headlineSmall,
                      color      = TextPrimary,
                      fontWeight = FontWeight.Bold)
-                Text("Review your Saily eSIM plan before confirming",
+                Text("Review your Connecta eSIM plan before confirming",
                      style = MaterialTheme.typography.bodyMedium,
                      color = TextSecondary)
             }
@@ -147,12 +147,12 @@ fun CartScreen(
                 }
             }
 
-            // ── Saily credits badge ───────────────────────────────────────────
+            // ── Connecta plan badge ───────────────────────────────────────────
             if (plan != null) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = SailyYellow.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, SailyYellow.copy(alpha = 0.4f))
+                    color = SuccessGreen.copy(alpha = 0.08f),
+                    border = BorderStroke(1.dp, SuccessGreen.copy(alpha = 0.4f))
                 ) {
                     Row(
                         modifier              = Modifier.fillMaxWidth().padding(14.dp),
@@ -162,11 +162,11 @@ fun CartScreen(
                         Icon(Icons.Filled.Check, contentDescription = null,
                              tint = SuccessGreen, modifier = Modifier.size(18.dp))
                         Column {
-                            Text("3% Saily Credits included",
+                            Text("Connecta Local — Global coverage",
                                  style      = MaterialTheme.typography.titleSmall,
                                  color      = NearBlack,
                                  fontWeight = FontWeight.SemiBold)
-                            Text("You'll earn $${"%.2f".format(plan.priceUSD * 0.03)} back on your next purchase",
+                            Text("Works in 200+ destinations worldwide",
                                  style = MaterialTheme.typography.bodySmall,
                                  color = TextSecondary)
                         }
@@ -219,13 +219,13 @@ fun CartScreen(
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape    = RoundedCornerShape(14.dp),
                     colors   = ButtonDefaults.buttonColors(
-                        containerColor         = SailyYellow,
+                        containerColor         = ConnectaOrange,
                         disabledContainerColor = Color(0xFFE5E7EB)
                     )
                 ) {
                     Text(
                         "Confirm & Start Trip",
-                        color      = NearBlack,
+                        color      = Color.White,
                         fontWeight = FontWeight.Bold,
                         style      = MaterialTheme.typography.titleSmall
                     )

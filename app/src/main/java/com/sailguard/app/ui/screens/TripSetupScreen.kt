@@ -78,7 +78,7 @@ import com.sailguard.app.ui.theme.AppSurface2
 import com.sailguard.app.ui.theme.CardBorder
 import com.sailguard.app.ui.theme.ErrorRed
 import com.sailguard.app.ui.theme.NearBlack
-import com.sailguard.app.ui.theme.SailyYellow
+import com.sailguard.app.ui.theme.ConnectaOrange
 import com.sailguard.app.ui.theme.SuccessGreen
 import com.sailguard.app.ui.theme.TextPrimary
 import com.sailguard.app.ui.theme.TextSecondary
@@ -169,13 +169,13 @@ fun TripSetupScreen(
                     modifier = Modifier.weight(if (step > 1) 2f else 1f).height(48.dp),
                     shape    = RoundedCornerShape(12.dp),
                     colors   = ButtonDefaults.buttonColors(
-                        containerColor         = SailyYellow,
+                        containerColor         = ConnectaOrange,
                         disabledContainerColor = AppSurface2
                     )
                 ) {
                     Text(
                         text       = if (step < 3) "Next →" else "Review Order →",
-                        color      = if (canAdvance) Color(0xFF0D0D0D) else TextSecondary,
+                        color      = if (canAdvance) Color.White else TextSecondary,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -205,9 +205,9 @@ private fun Step1Content(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Column {
-            Text("⛵ SailGuard",
+            Text("Connecta",
                  style         = MaterialTheme.typography.titleSmall,
-                 color         = NearBlack,
+                 color         = ConnectaOrange,
                  fontWeight    = FontWeight.Bold,
                  letterSpacing = 1.sp)
             Spacer(Modifier.height(4.dp))
@@ -244,7 +244,7 @@ private fun Step1Content(
                         onClick  = { if (state.durationDays > 1) vm.setDuration(state.durationDays - 1) },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(Icons.Filled.Remove, contentDescription = "Decrease", tint = SailyYellow)
+                        Icon(Icons.Filled.Remove, contentDescription = "Decrease", tint = ConnectaOrange)
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("${state.durationDays}",
@@ -257,7 +257,7 @@ private fun Step1Content(
                         onClick  = { if (state.durationDays < 60) vm.setDuration(state.durationDays + 1) },
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Increase", tint = SailyYellow)
+                        Icon(Icons.Filled.Add, contentDescription = "Increase", tint = ConnectaOrange)
                     }
                 }
             }
@@ -272,7 +272,7 @@ private fun Step1Content(
                     Surface(
                         modifier = Modifier.weight(1f).clickable { vm.setUsageStyle(style) },
                         shape    = RoundedCornerShape(12.dp),
-                        color    = if (selected) SailyYellow else AppSurface,
+                        color    = if (selected) ConnectaOrange else AppSurface,
                         border   = if (selected) null else BorderStroke(1.dp, CardBorder)
                     ) {
                         Column(
@@ -299,7 +299,7 @@ private fun Step1Content(
             Card(
                 colors = CardDefaults.cardColors(containerColor = AppSurface),
                 shape  = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, if (linkCode != null) SailyYellow.copy(alpha = 0.5f) else CardBorder)
+                border = BorderStroke(1.dp, if (linkCode != null) ConnectaOrange.copy(alpha = 0.5f) else CardBorder)
             ) {
                 Column {
                     Row(
@@ -314,7 +314,7 @@ private fun Step1Content(
                             Text(
                                 if (linkCode != null) "Session ID linked" else "Not linked",
                                 style      = MaterialTheme.typography.titleSmall,
-                                color      = if (linkCode != null) SailyYellow else TextPrimary,
+                                color      = if (linkCode != null) ConnectaOrange else TextPrimary,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
@@ -351,7 +351,7 @@ private fun Step1Content(
                                 colors        = OutlinedTextFieldDefaults.colors(
                                     focusedTextColor        = TextPrimary,
                                     unfocusedTextColor      = TextPrimary,
-                                    focusedBorderColor      = SailyYellow,
+                                    focusedBorderColor      = ConnectaOrange,
                                     unfocusedBorderColor    = CardBorder,
                                     focusedContainerColor   = AppSurface,
                                     unfocusedContainerColor = AppSurface
@@ -396,7 +396,7 @@ private fun DestinationPicker(
             colors        = OutlinedTextFieldDefaults.colors(
                 focusedTextColor        = TextPrimary,
                 unfocusedTextColor      = TextPrimary,
-                focusedBorderColor      = SailyYellow,
+                focusedBorderColor      = ConnectaOrange,
                 unfocusedBorderColor    = CardBorder,
                 focusedContainerColor   = AppSurface,
                 unfocusedContainerColor = AppSurface
@@ -438,7 +438,7 @@ private fun DestinationPicker(
                                 if (country.name == selectedDestination) {
                                     Spacer(Modifier.weight(1f))
                                     Icon(Icons.Filled.Check, contentDescription = null,
-                                         tint = SailyYellow, modifier = Modifier.size(16.dp))
+                                         tint = ConnectaOrange, modifier = Modifier.size(16.dp))
                                 }
                             }
                         }
@@ -483,9 +483,9 @@ private fun RegionCard(
 
     Card(
         colors    = CardDefaults.cardColors(
-            containerColor = if (highlighted) SailyYellow.copy(alpha = 0.12f) else AppSurface),
+            containerColor = if (highlighted) ConnectaOrange.copy(alpha = 0.12f) else AppSurface),
         shape     = RoundedCornerShape(14.dp),
-        border    = BorderStroke(1.dp, if (highlighted) SailyYellow else CardBorder),
+        border    = BorderStroke(1.dp, if (highlighted) ConnectaOrange else CardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
@@ -512,7 +512,7 @@ private fun RegionCard(
                 }
                 when {
                     isRegionSelected -> {
-                        Surface(shape = RoundedCornerShape(6.dp), color = SailyYellow) {
+                        Surface(shape = RoundedCornerShape(6.dp), color = ConnectaOrange) {
                             Text("Region Plan",
                                  modifier   = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                                  style      = MaterialTheme.typography.labelSmall,
@@ -556,7 +556,7 @@ private fun RegionCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (isSelected) SailyYellow.copy(alpha = 0.20f)
+                                    if (isSelected) ConnectaOrange.copy(alpha = 0.20f)
                                     else Color.Transparent,
                                     RoundedCornerShape(8.dp)
                                 )
@@ -572,7 +572,7 @@ private fun RegionCard(
                                  modifier = Modifier.weight(1f))
                             if (isSelected) {
                                 Icon(Icons.Filled.Check, contentDescription = null,
-                                     tint = SailyYellow, modifier = Modifier.size(16.dp))
+                                     tint = ConnectaOrange, modifier = Modifier.size(16.dp))
                             }
                         }
                     }
@@ -728,13 +728,22 @@ private fun Step3Content(
         val needed = bd * state.durationDays * 1.2
         state.availablePlans.filter { !it.isUnlimited && it.dataGB >= needed }
             .minByOrNull { it.priceUSD }
-            ?: state.availablePlans.filter { !it.isUnlimited }.maxByOrNull { it.dataGB }
+            ?: state.availablePlans.filter { it.isUnlimited && it.validDays >= state.durationDays }
+                .minByOrNull { it.priceUSD }
+            ?: state.availablePlans.filter { it.isUnlimited }.minByOrNull { it.priceUSD }
     }
 
     // Best value plan = highest GB / price ratio among data plans
     val bestValuePlan: SailyPlan? = remember(state.availablePlans) {
         state.availablePlans.filter { !it.isUnlimited && it.dataGB > 0 }
             .maxByOrNull { it.dataGB / it.priceUSD }
+    }
+
+    // Recommended plan floats to the top; everything else keeps catalog order
+    val displayPlans = remember(state.availablePlans, blendedRecommendedPlan) {
+        val rec = blendedRecommendedPlan
+        if (rec == null) state.availablePlans
+        else state.availablePlans.sortedBy { if (it.id == rec.id) 0 else 1 }
     }
 
     Column(
@@ -778,12 +787,13 @@ private fun Step3Content(
             // ── All plans (Feature 5: Saily-style cards) ──────────────────────
             SectionLabel("Available Plans")
 
-            state.availablePlans.forEach { plan ->
+            displayPlans.forEach { plan ->
                 SailyPlanCard(
                     plan           = plan,
                     isSelected     = state.selectedPlan?.id == plan.id ||
-                                     (state.selectedPlan == null && plan.id == state.suggestedPlan?.id),
-                    isBestChoice   = plan.id == bestValuePlan?.id,
+                                     (state.selectedPlan == null &&
+                                      plan.id == (blendedRecommendedPlan?.id ?: state.suggestedPlan?.id)),
+                    isBestChoice   = plan.id == bestValuePlan?.id && blendedRecommendedPlan == null,
                     isBlendMatch   = plan.id == blendedRecommendedPlan?.id && blend.blendedDailyGb != null,
                     onSelect       = { vm.selectPlan(it) }
                 )
@@ -818,9 +828,9 @@ private fun SmartHistoryCard(
     val sliderWeight = 100 - histWeight
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = SailyYellow.copy(alpha = 0.10f)),
+        colors = CardDefaults.cardColors(containerColor = ConnectaOrange.copy(alpha = 0.10f)),
         shape  = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, SailyYellow.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, ConnectaOrange.copy(alpha = 0.5f))
     ) {
         Column(
             modifier            = Modifier.padding(14.dp),
@@ -880,19 +890,21 @@ private fun SailyPlanCard(
     onSelect:     (SailyPlan) -> Unit
 ) {
     var selectedDays by remember { mutableStateOf(15) }
-    val displayPrice = if (plan.isUnlimited)
-        plan.unlimitedPrices[selectedDays] ?: PlanRepository.unlimitedPriceForDays(plan.priceUSD, selectedDays)
-    else plan.priceUSD
+    val displayPrice = when {
+        plan.isUnlimited && plan.unlimitedPrices.isNotEmpty() ->
+            plan.unlimitedPrices[selectedDays] ?: PlanRepository.unlimitedPriceForDays(plan.priceUSD, selectedDays)
+        else -> plan.priceUSD
+    }
 
     val borderColor    = when {
-        isSelected   -> SailyYellow
-        isBestChoice -> SailyYellow.copy(alpha = 0.6f)
+        isSelected   -> ConnectaOrange
+        isBestChoice -> ConnectaOrange.copy(alpha = 0.6f)
         else         -> CardBorder
     }
     val borderWidth    = if (isSelected || isBestChoice) 2.dp else 1.dp
     val containerColor = when {
         isBestChoice && !isSelected -> NearBlack
-        isSelected                  -> SailyYellow.copy(alpha = 0.10f)
+        isSelected                  -> ConnectaOrange.copy(alpha = 0.10f)
         else                        -> AppSurface
     }
     val textOnDark = isBestChoice && !isSelected
@@ -911,10 +923,10 @@ private fun SailyPlanCard(
             // ── Badges row ────────────────────────────────────────────────────
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (isBestChoice) {
-                    PlanBadge("Best Choice", NearBlack, SailyYellow)
+                    PlanBadge("Best Value", NearBlack, ConnectaOrange)
                 }
                 if (isBlendMatch && !isBestChoice) {
-                    PlanBadge("History Pick", NearBlack, SailyYellow.copy(alpha = 0.20f))
+                    PlanBadge("History Pick", NearBlack, ConnectaOrange.copy(alpha = 0.20f))
                 }
             }
 
@@ -934,7 +946,7 @@ private fun SailyPlanCard(
                     Text(
                         "$${"%.2f".format(displayPrice)}",
                         style      = MaterialTheme.typography.headlineSmall,
-                        color      = if (textOnDark) Color.White else SailyYellow,
+                        color      = if (textOnDark) Color.White else ConnectaOrange,
                         fontWeight = FontWeight.Bold
                     )
                     Text("USD",
@@ -943,26 +955,34 @@ private fun SailyPlanCard(
                 }
             }
 
-            // ── Unlimited: days selector ──────────────────────────────────────
+            // ── Unlimited: fixed validity (Connecta plans) or day selector (legacy) ──
             if (plan.isUnlimited) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf(7, 15, 30, 90).forEach { days ->
-                        val active = selectedDays == days
-                        Surface(
-                            modifier = Modifier.clickable { selectedDays = days },
-                            shape    = RoundedCornerShape(6.dp),
-                            color    = if (active) SailyYellow else AppSurface2,
-                            border   = if (active) null else BorderStroke(1.dp, CardBorder)
-                        ) {
-                            Text(
-                                "${days}d",
-                                modifier   = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                style      = MaterialTheme.typography.labelSmall,
-                                color      = if (active) NearBlack else TextSecondary,
-                                fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
-                            )
+                if (plan.unlimitedPrices.isNotEmpty()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        listOf(7, 15, 30, 90).forEach { days ->
+                            val active = selectedDays == days
+                            Surface(
+                                modifier = Modifier.clickable { selectedDays = days },
+                                shape    = RoundedCornerShape(6.dp),
+                                color    = if (active) ConnectaOrange else AppSurface2,
+                                border   = if (active) null else BorderStroke(1.dp, CardBorder)
+                            ) {
+                                Text(
+                                    "${days}d",
+                                    modifier   = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    style      = MaterialTheme.typography.labelSmall,
+                                    color      = if (active) Color.White else TextSecondary,
+                                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            }
                         }
                     }
+                } else {
+                    Text(
+                        "${plan.validDays} days",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (textOnDark) Color.White.copy(0.7f) else TextSecondary
+                    )
                 }
             } else {
                 // Validity
@@ -973,33 +993,18 @@ private fun SailyPlanCard(
                 )
             }
 
-            // ── Bottom row: Saily credits + network + selected check ──────────
+            // ── Bottom row: network + selected check ──────────────────────────
             Row(
                 modifier              = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.CenterVertically
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // 3% Saily credits badge
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = if (textOnDark) SailyYellow.copy(0.3f) else SailyYellow.copy(0.12f)
-                    ) {
-                        Text(
-                            "3% Saily credits",
-                            modifier   = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                            style      = MaterialTheme.typography.labelSmall,
-                            color      = if (textOnDark) Color.White else NearBlack,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    Text(plan.network,
-                         style = MaterialTheme.typography.labelSmall,
-                         color = if (textOnDark) Color.White.copy(0.6f) else TextSecondary)
-                }
+                Text(plan.network,
+                     style = MaterialTheme.typography.labelSmall,
+                     color = if (textOnDark) Color.White.copy(0.6f) else TextSecondary)
                 if (isSelected) {
                     Icon(Icons.Filled.Check, contentDescription = "Selected",
-                         tint = SailyYellow, modifier = Modifier.size(18.dp))
+                         tint = ConnectaOrange, modifier = Modifier.size(18.dp))
                 }
             }
         }
@@ -1040,7 +1045,7 @@ private fun WizardStepBar(currentStep: Int, modifier: Modifier = Modifier) {
                     modifier         = Modifier
                         .size(28.dp)
                         .background(
-                            if (isDone || isCurrent) SailyYellow else AppSurface2,
+                            if (isDone || isCurrent) ConnectaOrange else AppSurface2,
                             CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -1072,7 +1077,7 @@ private fun WizardStepBar(currentStep: Int, modifier: Modifier = Modifier) {
                         .weight(1f)
                         .padding(top = 13.dp)
                         .height(2.dp)
-                        .background(if (currentStep > stepNum) SailyYellow else CardBorder)
+                        .background(if (currentStep > stepNum) ConnectaOrange else CardBorder)
                 )
             }
         }
@@ -1111,7 +1116,7 @@ private fun UsageSliderRow(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(icon, contentDescription = null, tint = SailyYellow, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = ConnectaOrange, modifier = Modifier.size(20.dp))
                 Column {
                     Text(label,    style = MaterialTheme.typography.titleSmall, color = TextPrimary)
                     Text(subLabel, style = MaterialTheme.typography.labelSmall, color = TextSecondary)
@@ -1129,8 +1134,8 @@ private fun UsageSliderRow(
             value         = value,
             onValueChange = onChange,
             colors        = SliderDefaults.colors(
-                thumbColor         = SailyYellow,
-                activeTrackColor   = SailyYellow,
+                thumbColor         = ConnectaOrange,
+                activeTrackColor   = ConnectaOrange,
                 inactiveTrackColor = AppSurface2
             )
         )

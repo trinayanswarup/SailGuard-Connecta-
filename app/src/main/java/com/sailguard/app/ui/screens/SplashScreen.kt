@@ -34,12 +34,12 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text  = "SailGuard",
+                text  = "Connecta",
                 style = MaterialTheme.typography.displaySmall,
                 color = TextPrimary
             )
             Text(
-                text  = "Your smart travel companion",
+                text  = "Your global eSIM companion",
                 style = MaterialTheme.typography.bodyLarge,
                 color = TextSecondary
             )

@@ -14,254 +14,196 @@ object PlanRepository {
 
     data class CountryInfo(val name: String, val code: String, val flag: String)
 
-    // ── Pricing tiers ─────────────────────────────────────────────────────────
-    // Each tier: list of (dataGB, priceUSD) for fixed plans + unlimited 15-day base
+    // ── Connecta flat global plan catalog ─────────────────────────────────────
+    // Pricing is identical regardless of destination — no per-country tiers.
 
-    private data class TierDef(
-        val dataPlans: List<Pair<Double, Double>>,
-        val unlimitedBase15d: Double,
-        val unlimitedBase30d: Double = kotlin.math.round(unlimitedBase15d * 1.80 * 100) / 100.0,
-        val unlimitedBase90d: Double = kotlin.math.round(unlimitedBase15d * 4.50 * 100) / 100.0
+    private val connectaPlans: List<SailyPlan> = listOf(
+        SailyPlan(id = "plan-1gb",          country = "global", countryCode = "GL", dataGB = 1.0,             validDays = 7,  priceUSD = 3.99,  network = "Connecta Local"),
+        SailyPlan(id = "plan-3gb",          country = "global", countryCode = "GL", dataGB = 3.0,             validDays = 30, priceUSD = 6.99,  network = "Connecta Local"),
+        SailyPlan(id = "plan-5gb",          country = "global", countryCode = "GL", dataGB = 5.0,             validDays = 30, priceUSD = 9.99,  network = "Connecta Local"),
+        SailyPlan(id = "plan-10gb",         country = "global", countryCode = "GL", dataGB = 10.0,            validDays = 30, priceUSD = 15.99, network = "Connecta Local"),
+        SailyPlan(id = "plan-20gb",         country = "global", countryCode = "GL", dataGB = 20.0,            validDays = 30, priceUSD = 22.99, network = "Connecta Local"),
+        SailyPlan(id = "plan-unlimited-10", country = "global", countryCode = "GL", dataGB = Double.MAX_VALUE, validDays = 10, priceUSD = 34.99, network = "Connecta Local", isUnlimited = true),
+        SailyPlan(id = "plan-unlimited-15", country = "global", countryCode = "GL", dataGB = Double.MAX_VALUE, validDays = 15, priceUSD = 48.99, network = "Connecta Local", isUnlimited = true),
+        SailyPlan(id = "plan-unlimited-20", country = "global", countryCode = "GL", dataGB = Double.MAX_VALUE, validDays = 20, priceUSD = 59.99, network = "Connecta Local", isUnlimited = true),
+        SailyPlan(id = "plan-unlimited-25", country = "global", countryCode = "GL", dataGB = Double.MAX_VALUE, validDays = 25, priceUSD = 65.99, network = "Connecta Local", isUnlimited = true),
+        SailyPlan(id = "plan-unlimited-30", country = "global", countryCode = "GL", dataGB = Double.MAX_VALUE, validDays = 30, priceUSD = 71.99, network = "Connecta Local", isUnlimited = true)
     )
-
-    // Unlimited 15d prices are always higher than the most expensive fixed plan in each tier.
-    // Europe and Global carry explicit 30d/90d prices; all others derive them via the 1.80×/4.50× multipliers.
-
-    private val T_BALTIC = TierDef(                                    // max fixed: 20GB $29.99
-        listOf(1.0 to 3.99, 3.0 to 7.99, 5.0 to 11.99, 10.0 to 19.99, 20.0 to 29.99),
-        unlimitedBase15d = 34.99)
-
-    private val T_E_EU = TierDef(                                      // max fixed: 20GB $42.99
-        listOf(1.0 to 4.49, 3.0 to 9.99, 5.0 to 15.99, 10.0 to 27.99, 20.0 to 42.99),
-        unlimitedBase15d = 49.99)
-
-    private val T_EUROPE = TierDef(                                    // max fixed: 50GB $95.99
-        listOf(1.0 to 4.99, 3.0 to 12.49, 5.0 to 19.49, 10.0 to 35.99, 50.0 to 95.99),
-        unlimitedBase15d = 59.99, unlimitedBase30d = 109.99, unlimitedBase90d = 289.99)
-
-    private val T_UK = TierDef(                                        // max fixed: 20GB $59.99
-        listOf(1.0 to 5.99, 3.0 to 14.99, 5.0 to 22.99, 10.0 to 39.99, 20.0 to 59.99),
-        unlimitedBase15d = 64.99)
-
-    private val T_AS_CHE = TierDef(                                    // max fixed: 20GB $44.99
-        listOf(1.0 to 4.99, 3.0 to 10.99, 5.0 to 16.99, 10.0 to 28.99, 20.0 to 44.99),
-        unlimitedBase15d = 49.99)
-
-    private val T_AS_MID = TierDef(                                    // max fixed: 20GB $59.99
-        listOf(1.0 to 6.49, 3.0 to 14.99, 5.0 to 23.99, 10.0 to 42.99, 20.0 to 59.99),
-        unlimitedBase15d = 64.99)
-
-    private val T_AS_PRE = TierDef(                                    // max fixed: 20GB $64.99
-        listOf(1.0 to 7.99, 3.0 to 17.99, 5.0 to 28.99, 10.0 to 46.99, 20.0 to 64.99),
-        unlimitedBase15d = 69.99)
-
-    private val T_AM_N = TierDef(                                      // max fixed: 20GB $66.99
-        listOf(1.0 to 8.99, 3.0 to 19.99, 5.0 to 33.99, 10.0 to 49.99, 20.0 to 66.99),
-        unlimitedBase15d = 89.99)
-
-    private val T_AM_L = TierDef(                                      // max fixed: 20GB $61.99
-        listOf(1.0 to 6.99, 3.0 to 15.99, 5.0 to 25.99, 10.0 to 44.99, 20.0 to 61.99),
-        unlimitedBase15d = 64.99)
-
-    private val T_GLOBAL = TierDef(                                    // max fixed: 20GB $66.99
-        listOf(1.0 to 8.99, 3.0 to 19.99, 5.0 to 33.99, 10.0 to 49.99, 20.0 to 66.99),
-        unlimitedBase15d = 89.99, unlimitedBase30d = 149.99, unlimitedBase90d = 399.99)
 
     // ── Country master list ───────────────────────────────────────────────────
 
-    private data class CountryEntry(val info: CountryInfo, val tier: TierDef, val region: Region)
+    private data class CountryEntry(val info: CountryInfo, val region: Region)
 
     private val allEntries: List<CountryEntry> = listOf(
         // ── Europe – Baltic
-        CountryEntry(CountryInfo("Estonia",   "EE", "🇪🇪"), T_BALTIC, Region.EUROPE),
-        CountryEntry(CountryInfo("Latvia",    "LV", "🇱🇻"), T_BALTIC, Region.EUROPE),
-        CountryEntry(CountryInfo("Lithuania", "LT", "🇱🇹"), T_BALTIC, Region.EUROPE),
+        CountryEntry(CountryInfo("Estonia",   "EE", "🇪🇪"), Region.EUROPE),
+        CountryEntry(CountryInfo("Latvia",    "LV", "🇱🇻"), Region.EUROPE),
+        CountryEntry(CountryInfo("Lithuania", "LT", "🇱🇹"), Region.EUROPE),
         // ── Europe – Eastern EU
-        CountryEntry(CountryInfo("Albania",              "AL", "🇦🇱"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Bosnia & Herzegovina", "BA", "🇧🇦"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Bulgaria",             "BG", "🇧🇬"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Croatia",              "HR", "🇭🇷"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Czech Republic",       "CZ", "🇨🇿"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Hungary",              "HU", "🇭🇺"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Kosovo",               "XK", "🇽🇰"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Moldova",              "MD", "🇲🇩"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Montenegro",           "ME", "🇲🇪"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("North Macedonia",      "MK", "🇲🇰"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Poland",               "PL", "🇵🇱"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Romania",              "RO", "🇷🇴"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Serbia",               "RS", "🇷🇸"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Slovakia",             "SK", "🇸🇰"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Slovenia",             "SI", "🇸🇮"), T_E_EU, Region.EUROPE),
-        CountryEntry(CountryInfo("Ukraine",              "UA", "🇺🇦"), T_E_EU, Region.EUROPE),
+        CountryEntry(CountryInfo("Albania",              "AL", "🇦🇱"), Region.EUROPE),
+        CountryEntry(CountryInfo("Bosnia & Herzegovina", "BA", "🇧🇦"), Region.EUROPE),
+        CountryEntry(CountryInfo("Bulgaria",             "BG", "🇧🇬"), Region.EUROPE),
+        CountryEntry(CountryInfo("Croatia",              "HR", "🇭🇷"), Region.EUROPE),
+        CountryEntry(CountryInfo("Czech Republic",       "CZ", "🇨🇿"), Region.EUROPE),
+        CountryEntry(CountryInfo("Hungary",              "HU", "🇭🇺"), Region.EUROPE),
+        CountryEntry(CountryInfo("Kosovo",               "XK", "🇽🇰"), Region.EUROPE),
+        CountryEntry(CountryInfo("Moldova",              "MD", "🇲🇩"), Region.EUROPE),
+        CountryEntry(CountryInfo("Montenegro",           "ME", "🇲🇪"), Region.EUROPE),
+        CountryEntry(CountryInfo("North Macedonia",      "MK", "🇲🇰"), Region.EUROPE),
+        CountryEntry(CountryInfo("Poland",               "PL", "🇵🇱"), Region.EUROPE),
+        CountryEntry(CountryInfo("Romania",              "RO", "🇷🇴"), Region.EUROPE),
+        CountryEntry(CountryInfo("Serbia",               "RS", "🇷🇸"), Region.EUROPE),
+        CountryEntry(CountryInfo("Slovakia",             "SK", "🇸🇰"), Region.EUROPE),
+        CountryEntry(CountryInfo("Slovenia",             "SI", "🇸🇮"), Region.EUROPE),
+        CountryEntry(CountryInfo("Ukraine",              "UA", "🇺🇦"), Region.EUROPE),
         // ── Europe – Western / Nordic
-        CountryEntry(CountryInfo("Austria",       "AT", "🇦🇹"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Belgium",       "BE", "🇧🇪"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Cyprus",        "CY", "🇨🇾"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Denmark",       "DK", "🇩🇰"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Finland",       "FI", "🇫🇮"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("France",        "FR", "🇫🇷"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Germany",       "DE", "🇩🇪"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Greece",        "GR", "🇬🇷"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Iceland",       "IS", "🇮🇸"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Ireland",       "IE", "🇮🇪"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Italy",         "IT", "🇮🇹"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Liechtenstein", "LI", "🇱🇮"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Luxembourg",    "LU", "🇱🇺"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Malta",         "MT", "🇲🇹"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Netherlands",   "NL", "🇳🇱"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Norway",        "NO", "🇳🇴"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Portugal",      "PT", "🇵🇹"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Spain",         "ES", "🇪🇸"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Sweden",        "SE", "🇸🇪"), T_EUROPE, Region.EUROPE),
-        CountryEntry(CountryInfo("Switzerland",   "CH", "🇨🇭"), T_EUROPE, Region.EUROPE),
+        CountryEntry(CountryInfo("Austria",       "AT", "🇦🇹"), Region.EUROPE),
+        CountryEntry(CountryInfo("Belgium",       "BE", "🇧🇪"), Region.EUROPE),
+        CountryEntry(CountryInfo("Cyprus",        "CY", "🇨🇾"), Region.EUROPE),
+        CountryEntry(CountryInfo("Denmark",       "DK", "🇩🇰"), Region.EUROPE),
+        CountryEntry(CountryInfo("Finland",       "FI", "🇫🇮"), Region.EUROPE),
+        CountryEntry(CountryInfo("France",        "FR", "🇫🇷"), Region.EUROPE),
+        CountryEntry(CountryInfo("Germany",       "DE", "🇩🇪"), Region.EUROPE),
+        CountryEntry(CountryInfo("Greece",        "GR", "🇬🇷"), Region.EUROPE),
+        CountryEntry(CountryInfo("Iceland",       "IS", "🇮🇸"), Region.EUROPE),
+        CountryEntry(CountryInfo("Ireland",       "IE", "🇮🇪"), Region.EUROPE),
+        CountryEntry(CountryInfo("Italy",         "IT", "🇮🇹"), Region.EUROPE),
+        CountryEntry(CountryInfo("Liechtenstein", "LI", "🇱🇮"), Region.EUROPE),
+        CountryEntry(CountryInfo("Luxembourg",    "LU", "🇱🇺"), Region.EUROPE),
+        CountryEntry(CountryInfo("Malta",         "MT", "🇲🇹"), Region.EUROPE),
+        CountryEntry(CountryInfo("Netherlands",   "NL", "🇳🇱"), Region.EUROPE),
+        CountryEntry(CountryInfo("Norway",        "NO", "🇳🇴"), Region.EUROPE),
+        CountryEntry(CountryInfo("Portugal",      "PT", "🇵🇹"), Region.EUROPE),
+        CountryEntry(CountryInfo("Spain",         "ES", "🇪🇸"), Region.EUROPE),
+        CountryEntry(CountryInfo("Sweden",        "SE", "🇸🇪"), Region.EUROPE),
+        CountryEntry(CountryInfo("Switzerland",   "CH", "🇨🇭"), Region.EUROPE),
         // ── Europe – UK
-        CountryEntry(CountryInfo("United Kingdom", "GB", "🇬🇧"), T_UK, Region.EUROPE),
+        CountryEntry(CountryInfo("United Kingdom", "GB", "🇬🇧"), Region.EUROPE),
         // ── Asia – Cheap
-        CountryEntry(CountryInfo("Bangladesh", "BD", "🇧🇩"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Cambodia",   "KH", "🇰🇭"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("India",      "IN", "🇮🇳"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Indonesia",  "ID", "🇮🇩"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Laos",       "LA", "🇱🇦"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Myanmar",    "MM", "🇲🇲"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Nepal",      "NP", "🇳🇵"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Pakistan",   "PK", "🇵🇰"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Philippines","PH", "🇵🇭"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Sri Lanka",  "LK", "🇱🇰"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Thailand",   "TH", "🇹🇭"), T_AS_CHE, Region.ASIA),
-        CountryEntry(CountryInfo("Vietnam",    "VN", "🇻🇳"), T_AS_CHE, Region.ASIA),
+        CountryEntry(CountryInfo("Bangladesh", "BD", "🇧🇩"), Region.ASIA),
+        CountryEntry(CountryInfo("Cambodia",   "KH", "🇰🇭"), Region.ASIA),
+        CountryEntry(CountryInfo("India",      "IN", "🇮🇳"), Region.ASIA),
+        CountryEntry(CountryInfo("Indonesia",  "ID", "🇮🇩"), Region.ASIA),
+        CountryEntry(CountryInfo("Laos",       "LA", "🇱🇦"), Region.ASIA),
+        CountryEntry(CountryInfo("Myanmar",    "MM", "🇲🇲"), Region.ASIA),
+        CountryEntry(CountryInfo("Nepal",      "NP", "🇳🇵"), Region.ASIA),
+        CountryEntry(CountryInfo("Pakistan",   "PK", "🇵🇰"), Region.ASIA),
+        CountryEntry(CountryInfo("Philippines","PH", "🇵🇭"), Region.ASIA),
+        CountryEntry(CountryInfo("Sri Lanka",  "LK", "🇱🇰"), Region.ASIA),
+        CountryEntry(CountryInfo("Thailand",   "TH", "🇹🇭"), Region.ASIA),
+        CountryEntry(CountryInfo("Vietnam",    "VN", "🇻🇳"), Region.ASIA),
         // ── Asia – Mid
-        CountryEntry(CountryInfo("Brunei",   "BN", "🇧🇳"), T_AS_MID, Region.ASIA),
-        CountryEntry(CountryInfo("China",    "CN", "🇨🇳"), T_AS_MID, Region.ASIA),
-        CountryEntry(CountryInfo("Malaysia", "MY", "🇲🇾"), T_AS_MID, Region.ASIA),
-        CountryEntry(CountryInfo("Maldives", "MV", "🇲🇻"), T_AS_MID, Region.ASIA),
-        CountryEntry(CountryInfo("Mongolia", "MN", "🇲🇳"), T_AS_MID, Region.ASIA),
+        CountryEntry(CountryInfo("Brunei",   "BN", "🇧🇳"), Region.ASIA),
+        CountryEntry(CountryInfo("China",    "CN", "🇨🇳"), Region.ASIA),
+        CountryEntry(CountryInfo("Malaysia", "MY", "🇲🇾"), Region.ASIA),
+        CountryEntry(CountryInfo("Maldives", "MV", "🇲🇻"), Region.ASIA),
+        CountryEntry(CountryInfo("Mongolia", "MN", "🇲🇳"), Region.ASIA),
         // ── Asia – Premium
-        CountryEntry(CountryInfo("Hong Kong",   "HK", "🇭🇰"), T_AS_PRE, Region.ASIA),
-        CountryEntry(CountryInfo("Japan",       "JP", "🇯🇵"), T_AS_PRE, Region.ASIA),
-        CountryEntry(CountryInfo("Macao",       "MO", "🇲🇴"), T_AS_PRE, Region.ASIA),
-        CountryEntry(CountryInfo("Singapore",   "SG", "🇸🇬"), T_AS_PRE, Region.ASIA),
-        CountryEntry(CountryInfo("South Korea", "KR", "🇰🇷"), T_AS_PRE, Region.ASIA),
-        CountryEntry(CountryInfo("Taiwan",      "TW", "🇹🇼"), T_AS_PRE, Region.ASIA),
+        CountryEntry(CountryInfo("Hong Kong",   "HK", "🇭🇰"), Region.ASIA),
+        CountryEntry(CountryInfo("Japan",       "JP", "🇯🇵"), Region.ASIA),
+        CountryEntry(CountryInfo("Macao",       "MO", "🇲🇴"), Region.ASIA),
+        CountryEntry(CountryInfo("Singapore",   "SG", "🇸🇬"), Region.ASIA),
+        CountryEntry(CountryInfo("South Korea", "KR", "🇰🇷"), Region.ASIA),
+        CountryEntry(CountryInfo("Taiwan",      "TW", "🇹🇼"), Region.ASIA),
         // ── Americas – North
-        CountryEntry(CountryInfo("Canada",        "CA", "🇨🇦"), T_AM_N, Region.AMERICAS),
-        CountryEntry(CountryInfo("United States", "US", "🇺🇸"), T_AM_N, Region.AMERICAS),
+        CountryEntry(CountryInfo("Canada",        "CA", "🇨🇦"), Region.AMERICAS),
+        CountryEntry(CountryInfo("United States", "US", "🇺🇸"), Region.AMERICAS),
         // ── Americas – Latin
-        CountryEntry(CountryInfo("Argentina",          "AR", "🇦🇷"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Bahamas",            "BS", "🇧🇸"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Barbados",           "BB", "🇧🇧"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Bolivia",            "BO", "🇧🇴"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Brazil",             "BR", "🇧🇷"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Chile",              "CL", "🇨🇱"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Colombia",           "CO", "🇨🇴"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Costa Rica",         "CR", "🇨🇷"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Cuba",               "CU", "🇨🇺"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Dominican Republic", "DO", "🇩🇴"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Ecuador",            "EC", "🇪🇨"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("El Salvador",        "SV", "🇸🇻"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Guatemala",          "GT", "🇬🇹"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Honduras",           "HN", "🇭🇳"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Jamaica",            "JM", "🇯🇲"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Mexico",             "MX", "🇲🇽"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Nicaragua",          "NI", "🇳🇮"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Panama",             "PA", "🇵🇦"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Paraguay",           "PY", "🇵🇾"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Peru",               "PE", "🇵🇪"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Trinidad & Tobago",  "TT", "🇹🇹"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Uruguay",            "UY", "🇺🇾"), T_AM_L, Region.AMERICAS),
-        CountryEntry(CountryInfo("Venezuela",          "VE", "🇻🇪"), T_AM_L, Region.AMERICAS),
+        CountryEntry(CountryInfo("Argentina",          "AR", "🇦🇷"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Bahamas",            "BS", "🇧🇸"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Barbados",           "BB", "🇧🇧"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Bolivia",            "BO", "🇧🇴"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Brazil",             "BR", "🇧🇷"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Chile",              "CL", "🇨🇱"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Colombia",           "CO", "🇨🇴"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Costa Rica",         "CR", "🇨🇷"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Cuba",               "CU", "🇨🇺"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Dominican Republic", "DO", "🇩🇴"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Ecuador",            "EC", "🇪🇨"), Region.AMERICAS),
+        CountryEntry(CountryInfo("El Salvador",        "SV", "🇸🇻"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Guatemala",          "GT", "🇬🇹"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Honduras",           "HN", "🇭🇳"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Jamaica",            "JM", "🇯🇲"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Mexico",             "MX", "🇲🇽"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Nicaragua",          "NI", "🇳🇮"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Panama",             "PA", "🇵🇦"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Paraguay",           "PY", "🇵🇾"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Peru",               "PE", "🇵🇪"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Trinidad & Tobago",  "TT", "🇹🇹"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Uruguay",            "UY", "🇺🇾"), Region.AMERICAS),
+        CountryEntry(CountryInfo("Venezuela",          "VE", "🇻🇪"), Region.AMERICAS),
         // ── Global – Middle East
-        CountryEntry(CountryInfo("Bahrain",      "BH", "🇧🇭"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Israel",       "IL", "🇮🇱"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Jordan",       "JO", "🇯🇴"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Kuwait",       "KW", "🇰🇼"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Lebanon",      "LB", "🇱🇧"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Oman",         "OM", "🇴🇲"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Qatar",        "QA", "🇶🇦"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Saudi Arabia", "SA", "🇸🇦"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Turkey",       "TR", "🇹🇷"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("UAE",          "AE", "🇦🇪"), T_GLOBAL, Region.GLOBAL),
+        CountryEntry(CountryInfo("Bahrain",      "BH", "🇧🇭"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Israel",       "IL", "🇮🇱"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Jordan",       "JO", "🇯🇴"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Kuwait",       "KW", "🇰🇼"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Lebanon",      "LB", "🇱🇧"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Oman",         "OM", "🇴🇲"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Qatar",        "QA", "🇶🇦"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Saudi Arabia", "SA", "🇸🇦"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Turkey",       "TR", "🇹🇷"), Region.GLOBAL),
+        CountryEntry(CountryInfo("UAE",          "AE", "🇦🇪"), Region.GLOBAL),
         // ── Global – Africa
-        CountryEntry(CountryInfo("Egypt",        "EG", "🇪🇬"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Ethiopia",     "ET", "🇪🇹"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Ghana",        "GH", "🇬🇭"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Kenya",        "KE", "🇰🇪"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Morocco",      "MA", "🇲🇦"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Nigeria",      "NG", "🇳🇬"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("South Africa", "ZA", "🇿🇦"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Tanzania",     "TZ", "🇹🇿"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Tunisia",      "TN", "🇹🇳"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Uganda",       "UG", "🇺🇬"), T_GLOBAL, Region.GLOBAL),
+        CountryEntry(CountryInfo("Egypt",        "EG", "🇪🇬"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Ethiopia",     "ET", "🇪🇹"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Ghana",        "GH", "🇬🇭"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Kenya",        "KE", "🇰🇪"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Morocco",      "MA", "🇲🇦"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Nigeria",      "NG", "🇳🇬"), Region.GLOBAL),
+        CountryEntry(CountryInfo("South Africa", "ZA", "🇿🇦"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Tanzania",     "TZ", "🇹🇿"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Tunisia",      "TN", "🇹🇳"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Uganda",       "UG", "🇺🇬"), Region.GLOBAL),
         // ── Global – Oceania
-        CountryEntry(CountryInfo("Australia",       "AU", "🇦🇺"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Fiji",            "FJ", "🇫🇯"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("New Zealand",     "NZ", "🇳🇿"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Papua New Guinea","PG", "🇵🇬"), T_GLOBAL, Region.GLOBAL),
+        CountryEntry(CountryInfo("Australia",       "AU", "🇦🇺"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Fiji",            "FJ", "🇫🇯"), Region.GLOBAL),
+        CountryEntry(CountryInfo("New Zealand",     "NZ", "🇳🇿"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Papua New Guinea","PG", "🇵🇬"), Region.GLOBAL),
         // ── Global – Central Asia & Caucasus
-        CountryEntry(CountryInfo("Armenia",    "AM", "🇦🇲"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Azerbaijan", "AZ", "🇦🇿"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Georgia",    "GE", "🇬🇪"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Kazakhstan", "KZ", "🇰🇿"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Kyrgyzstan", "KG", "🇰🇬"), T_GLOBAL, Region.GLOBAL),
-        CountryEntry(CountryInfo("Uzbekistan", "UZ", "🇺🇿"), T_GLOBAL, Region.GLOBAL)
+        CountryEntry(CountryInfo("Armenia",    "AM", "🇦🇲"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Azerbaijan", "AZ", "🇦🇿"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Georgia",    "GE", "🇬🇪"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Kazakhstan", "KZ", "🇰🇿"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Kyrgyzstan", "KG", "🇰🇬"), Region.GLOBAL),
+        CountryEntry(CountryInfo("Uzbekistan", "UZ", "🇺🇿"), Region.GLOBAL)
     )
 
     // ── Derived collections ───────────────────────────────────────────────────
 
     val countries: List<CountryInfo> = allEntries.map { it.info }.sortedBy { it.name }
 
-    private val plansByCountry: Map<String, List<SailyPlan>> =
-        allEntries.associate { e -> e.info.name to buildPlans(e.info.name, e.info.code, e.tier) }
-
     private val regionByCountry: Map<String, Region> =
         allEntries.associate { e -> e.info.name to e.region }
 
     fun regionForCountry(name: String): Region = regionByCountry[name] ?: Region.GLOBAL
 
-    fun regionDisplayName(region: Region): String =
-        if (region == Region.GLOBAL) region.displayName else "${region.displayName} Regional"
-
-    private val regionalPlans: Map<Region, List<SailyPlan>> = mapOf(
-        Region.EUROPE   to buildRegionalPlans("eu", Region.EUROPE,
-            listOf(1.0 to 4.99, 3.0 to 12.49, 5.0 to 19.49, 10.0 to 35.99, 50.0 to 95.99),
-            unlimitedBase = 59.99, unlimited30d = 109.99, unlimited90d = 289.99),
-        Region.ASIA     to buildRegionalPlans("as", Region.ASIA,
-            listOf(1.0 to 5.99, 3.0 to 14.99, 5.0 to 22.99, 10.0 to 39.99, 20.0 to 64.99),
-            unlimitedBase = 74.99, unlimited30d = 129.99, unlimited90d = 319.99),
-        Region.AMERICAS to buildRegionalPlans("am", Region.AMERICAS,
-            listOf(1.0 to 6.99, 3.0 to 16.99, 5.0 to 24.99, 10.0 to 44.99, 20.0 to 74.99),
-            unlimitedBase = 79.99, unlimited30d = 139.99, unlimited90d = 349.99),
-        Region.GLOBAL   to buildRegionalPlans("gl", Region.GLOBAL,
-            listOf(1.0 to 8.99, 3.0 to 19.99, 5.0 to 33.99, 10.0 to 49.99, 20.0 to 66.99),
-            unlimitedBase = 89.99, unlimited30d = 149.99, unlimited90d = 399.99)
-    )
-
-    fun getRegionalPlans(region: Region): List<SailyPlan> = regionalPlans[region] ?: emptyList()
+    fun regionDisplayName(region: Region): String = region.displayName
 
     fun countriesInRegion(region: Region): List<CountryInfo> =
         allEntries.filter { it.region == region }.map { it.info }.sortedBy { it.name }
 
     // ── Plan access ───────────────────────────────────────────────────────────
 
-    fun getPlansForCountry(country: String): List<SailyPlan> =
-        plansByCountry[country] ?: emptyList()
+    fun getPlansForCountry(country: String): List<SailyPlan> = connectaPlans
 
-    /** Cheapest data plan covering expected usage (slider-style dailyGb × duration × 1.2). */
-    fun suggestPlan(country: String, durationDays: Int, style: UsageStyle): SailyPlan? {
-        val needed = style.dailyGb * durationDays * 1.2
-        val list   = getPlansForCountry(country).filter { !it.isUnlimited }
-        return list.filter { it.dataGB >= needed }.minByOrNull { it.priceUSD }
-            ?: list.maxByOrNull { it.dataGB }
+    fun getRegionalPlans(region: Region): List<SailyPlan> = connectaPlans
+
+    fun suggestPlan(country: String, durationDays: Int, usageStyle: UsageStyle): SailyPlan? {
+        val neededGb = usageStyle.dailyGb * durationDays * 1.2
+        val fixedMatch = connectaPlans
+            .filter { !it.isUnlimited && it.dataGB >= neededGb && it.validDays >= durationDays }
+            .minByOrNull { it.priceUSD }
+        if (fixedMatch != null) return fixedMatch
+        return connectaPlans
+            .filter { it.isUnlimited && it.validDays >= durationDays }
+            .minByOrNull { it.priceUSD }
+            ?: connectaPlans.filter { it.isUnlimited }.minByOrNull { it.priceUSD }
     }
 
     fun flagForCountry(country: String): String =
         allEntries.find { it.info.name == country }?.info?.flag ?: "🌍"
 
-    // ── Unlimited plan pricing ────────────────────────────────────────────────
-
-    /**
-     * Returns the price for an unlimited plan given a [base15DayPrice] and desired [days].
-     * Scaled from the 15-day baseline: 7d ≈ 67 %, 30d ≈ 180 %, 90d ≈ 450 %.
-     */
+    // Retained for call sites in TripSetupScreen that still use the old unlimited price scaling UI.
     fun unlimitedPriceForDays(base15DayPrice: Double, days: Int): Double {
         val multiplier = when (days) {
             7  -> 0.67
@@ -271,75 +213,5 @@ object PlanRepository {
             else -> 1.00
         }
         return kotlin.math.round(base15DayPrice * multiplier * 100) / 100.0
-    }
-
-    // ── Private helpers ───────────────────────────────────────────────────────
-
-    private fun buildRegionalPlans(
-        code:          String,
-        region:        Region,
-        dataPlans:     List<Pair<Double, Double>>,
-        unlimitedBase: Double?,
-        unlimited30d:  Double? = unlimitedBase?.let { kotlin.math.round(it * 1.80 * 100) / 100.0 },
-        unlimited90d:  Double? = unlimitedBase?.let { kotlin.math.round(it * 4.50 * 100) / 100.0 }
-    ): List<SailyPlan> {
-        val name  = regionDisplayName(region)
-        val plans = dataPlans.mapIndexed { i, (gb, price) ->
-            SailyPlan(
-                id          = "$code-reg-$i",
-                country     = name,
-                countryCode = code.uppercase(),
-                dataGB      = gb,
-                validDays   = 30,
-                priceUSD    = price
-            )
-        }
-        if (unlimitedBase == null) return plans
-        val p30 = unlimited30d ?: (kotlin.math.round(unlimitedBase * 1.80 * 100) / 100.0)
-        val p90 = unlimited90d ?: (kotlin.math.round(unlimitedBase * 4.50 * 100) / 100.0)
-        return plans + SailyPlan(
-            id          = "$code-reg-u",
-            country     = name,
-            countryCode = code.uppercase(),
-            dataGB      = Double.MAX_VALUE,
-            validDays   = 15,
-            priceUSD    = unlimitedBase,
-            isUnlimited = true,
-            unlimitedPrices = mapOf(
-                7  to kotlin.math.round(unlimitedBase * 0.67 * 100) / 100.0,
-                15 to unlimitedBase,
-                30 to p30,
-                90 to p90
-            )
-        )
-    }
-
-    private fun buildPlans(country: String, code: String, tier: TierDef): List<SailyPlan> {
-        val dataPlans = tier.dataPlans.mapIndexed { i, (gb, price) ->
-            SailyPlan(
-                id         = "${code.lowercase()}-$i",
-                country    = country,
-                countryCode = code,
-                dataGB     = gb,
-                validDays  = 30,
-                priceUSD   = price
-            )
-        }
-        val unlimited = SailyPlan(
-            id          = "${code.lowercase()}-u",
-            country     = country,
-            countryCode = code,
-            dataGB      = Double.MAX_VALUE,
-            validDays   = 15,
-            priceUSD    = tier.unlimitedBase15d,
-            isUnlimited = true,
-            unlimitedPrices = mapOf(
-                7  to kotlin.math.round(tier.unlimitedBase15d * 0.67 * 100) / 100.0,
-                15 to tier.unlimitedBase15d,
-                30 to tier.unlimitedBase30d,
-                90 to tier.unlimitedBase90d
-            )
-        )
-        return dataPlans + unlimited
     }
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sailguard.app.data.model.TripHistoryEntity
+import com.sailguard.app.data.network.ConnectaApiClient
 import com.sailguard.app.ui.theme.AppBackground
 import com.sailguard.app.ui.theme.AppSurface
 import com.sailguard.app.ui.theme.CardBorder
@@ -52,7 +53,9 @@ private val dateFormat = SimpleDateFormat("d MMM yyyy", Locale.getDefault())
 
 @Composable
 fun HistoryScreen(historyVm: HistoryViewModel) {
-    val trips by historyVm.trips.collectAsState()
+    val trips        by historyVm.trips.collectAsState()
+    val syncedTrips  by historyVm.syncedTrips.collectAsState()
+    val totalCount = trips.size + syncedTrips.size
 
     Column(
         modifier = Modifier
@@ -70,14 +73,14 @@ fun HistoryScreen(historyVm: HistoryViewModel) {
             Column {
                 Text("Trip History",
                      style = MaterialTheme.typography.headlineSmall, color = TextPrimary)
-                Text("${trips.size} trip${if (trips.size == 1) "" else "s"} recorded",
+                Text("$totalCount trip${if (totalCount == 1) "" else "s"} recorded",
                      style = MaterialTheme.typography.bodySmall,  color = TextSecondary)
             }
         }
 
         Spacer(Modifier.height(20.dp))
 
-        if (trips.isEmpty()) {
+        if (trips.isEmpty() && syncedTrips.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -94,10 +97,96 @@ fun HistoryScreen(historyVm: HistoryViewModel) {
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (syncedTrips.isNotEmpty()) {
+                    item {
+                        Text(
+                            "Synced from Connecta",
+                            style      = MaterialTheme.typography.titleSmall,
+                            color      = TextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    items(syncedTrips, key = { it.id }) { trip ->
+                        SyncedTripCard(trip)
+                    }
+                    item { Spacer(Modifier.height(8.dp)) }
+                }
                 items(trips, key = { it.id }) { trip ->
                     TripHistoryCard(trip)
                 }
                 item { Spacer(Modifier.height(80.dp)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SyncedTripCard(trip: ConnectaApiClient.SyncedTrip) {
+    Card(
+        colors    = CardDefaults.cardColors(containerColor = AppSurface),
+        shape     = RoundedCornerShape(16.dp),
+        border    = androidx.compose.foundation.BorderStroke(1.dp, CardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier              = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment     = Alignment.Top
+        ) {
+            Box(
+                modifier         = Modifier
+                    .size(40.dp)
+                    .background(SuccessGreen.copy(alpha = 0.12f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector        = Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint               = SuccessGreen,
+                    modifier           = Modifier.size(22.dp)
+                )
+            }
+            Column(
+                modifier            = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    trip.destination,
+                    style      = MaterialTheme.typography.titleMedium,
+                    color      = TextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    "${trip.startDate} → ${trip.endDate}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary
+                )
+                val planInfo = listOfNotNull(
+                    trip.dataLabel,
+                    trip.priceUsd?.let { "$${"%.2f".format(it)}" }
+                ).joinToString(" · ")
+                if (planInfo.isNotEmpty()) {
+                    Text(planInfo, style = MaterialTheme.typography.bodySmall, color = TextSecondary)
+                }
+                Row(
+                    modifier              = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment     = Alignment.CenterVertically
+                ) {
+                    Text(
+                        trip.planProvider ?: "Connecta Local",
+                        style      = MaterialTheme.typography.labelSmall,
+                        color      = SuccessGreen,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        "Web checkout",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextSecondary
+                    )
+                }
             }
         }
     }

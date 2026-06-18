@@ -43,7 +43,7 @@ import com.sailguard.app.ui.theme.CardBorder
 import com.sailguard.app.ui.theme.ErrorRed
 import com.sailguard.app.ui.theme.SuccessGreen
 import com.sailguard.app.ui.theme.NearBlack
-import com.sailguard.app.ui.theme.SailyYellow
+import com.sailguard.app.ui.theme.ConnectaOrange
 import com.sailguard.app.ui.theme.NearBlack
 import com.sailguard.app.ui.theme.TextPrimary
 import com.sailguard.app.ui.theme.TextSecondary
@@ -236,8 +236,8 @@ private fun UsageSliderRow(
             value         = value,
             onValueChange = onChange,
             colors        = SliderDefaults.colors(
-                thumbColor         = SailyYellow,
-                activeTrackColor   = SailyYellow,
+                thumbColor         = ConnectaOrange,
+                activeTrackColor   = ConnectaOrange,
                 inactiveTrackColor = AppSurface2
             )
         )
@@ -286,7 +286,7 @@ private fun CompatibilityBanner(
     val icon     = if (sufficient) "✓" else "⚠"
     val headline = if (sufficient) "Plan is sufficient" else "Plan may not be enough"
     val detail   = if (sufficient)
-        "Your ${planGb}GB Saily plan covers the estimated ${"%.1f".format(neededGb)} GB. " +
+        "Your ${planGb}GB Connecta plan covers the estimated ${"%.1f".format(neededGb)} GB. " +
         "You have ${"%.1f".format(planGb - neededGb)} GB headroom."
     else
         "You need ~${"%.1f".format(neededGb)} GB but your plan is only ${planGb} GB. " +

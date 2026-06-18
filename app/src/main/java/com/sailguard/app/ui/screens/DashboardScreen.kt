@@ -47,7 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sailguard.app.ui.theme.SailyYellow
+import com.sailguard.app.ui.theme.ConnectaOrange
+import com.sailguard.app.ui.theme.ConnectaOrangeLight
 import com.sailguard.app.data.model.NetworkStrength
 import com.sailguard.app.ui.theme.AppBackground
 import com.sailguard.app.ui.theme.AppSurface
@@ -134,11 +135,11 @@ fun DashboardScreen(
                 Button(
                     onClick = onNavigateToSetup,
                     shape   = RoundedCornerShape(12.dp),
-                    colors  = ButtonDefaults.buttonColors(containerColor = SailyYellow)
+                    colors  = ButtonDefaults.buttonColors(containerColor = ConnectaOrange)
                 ) {
                     Text(
                         text       = "Plan a Trip",
-                        color      = Color(0xFF0D0D0D),
+                        color      = Color.White,
                         fontWeight = FontWeight.SemiBold,
                         modifier   = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                     )
@@ -161,14 +162,30 @@ fun DashboardScreen(
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(trip.flag, style = MaterialTheme.typography.headlineSmall)
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(trip.destination,
                      style = MaterialTheme.typography.titleLarge,
                      color = TextPrimary,
                      fontWeight = FontWeight.Bold)
-                Text("${trip.selectedPlan.dataGB.toLong()} GB Saily Plan  ·  ${trip.durationDays} days",
+                Text("${trip.selectedPlan.dataGB.toLong()} GB Connecta Plan  ·  ${trip.durationDays} days",
                      style = MaterialTheme.typography.bodySmall,
                      color = TextSecondary)
+                if (trip.connectaTripId != null) {
+                    androidx.compose.foundation.layout.Spacer(Modifier.height(2.dp))
+                    androidx.compose.material3.Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
+                        color = SuccessGreen.copy(alpha = 0.12f),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, SuccessGreen.copy(alpha = 0.4f))
+                    ) {
+                        Text(
+                            "Synced with Connecta",
+                            modifier   = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style      = MaterialTheme.typography.labelSmall,
+                            color      = SuccessGreen,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
 
