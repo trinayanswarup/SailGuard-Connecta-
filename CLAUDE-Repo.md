@@ -7,7 +7,6 @@ Open in Android Studio, let Gradle sync, run on a device or emulator.
 ```bash
 git clone https://github.com/trinayanswarup/SailGuard.git
 cd SailGuard
-# Open in Android Studio → Run
 ```
 
 ## Tech stack
