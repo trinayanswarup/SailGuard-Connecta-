@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
  */
 object ConnectaApiClient {
 
-    private const val BASE_URL = "http://192.168.68.103:8080/graphql"
+    private const val BASE_URL = "https://connecta-eagq.onrender.com/graphql"
     private val JSON = "application/json".toMediaType()
 
     private val client = OkHttpClient.Builder()

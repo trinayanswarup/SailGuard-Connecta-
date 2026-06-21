@@ -6,6 +6,13 @@ It works fully standalone for planning, recommendation, tracking, and local hist
 
 ---
 
+## Screenshots
+
+![Setup](docs/screenshots/setup.jpeg)
+![Plans](docs/screenshots/plans.png)
+![Dashboard](docs/screenshots/dashboard.png)
+![History](docs/screenshots/history.png)
+
 ## Stack
 
 |                  |                                                           |
