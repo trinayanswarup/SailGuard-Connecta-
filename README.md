@@ -1,5 +1,7 @@
 # Connecta — Android
 
+**[Live Backend](https://connecta-eagq.onrender.com/graphql)** · **[Web App](https://connecta-frontend-one.vercel.app)**
+
 Native Android companion to [Connecta](https://github.com/trinayanswarup/Connecta). The app plans trips, recommends travel data plans, tracks real mobile data usage during active trips, and syncs confirmed plan selections and usage snapshots with the Connecta web app through a shared Go/GraphQL backend.
 
 It works fully standalone for planning, recommendation, tracking, and local history. When linked to a Connecta web session, plan confirmations from either client appear on both, and Android usage snapshots feed a live usage chart on the web.
@@ -113,14 +115,9 @@ git clone https://github.com/trinayanswarup/SailGuard.git
 
 Open in Android Studio, let Gradle sync, run on a device or emulator.
 
-To test backend sync: run `go run ./cmd/server` in the Connecta repo, then set `ConnectaApiClient.BASE_URL`:
+Backend is deployed at `https://connecta-eagq.onrender.com/graphql` — no local server needed.
 
-- **Emulator** → `http://10.0.2.2:8080/graphql`
-- **Real device (same Wi-Fi)** → `http://<your-LAN-IP>:8080/graphql`
-
-`android:usesCleartextTraffic="true"` is set in the manifest for local development against a plain `http://` backend. Remove it once the backend is deployed over HTTPS.
-
-Get the link code: `localStorage.getItem("connecta_session_id")` in Connecta's browser console.
+Get the link code from the Connecta web app: open browser console on [connecta-frontend-one.vercel.app](https://connecta-frontend-one.vercel.app) and run `localStorage.getItem("connecta_session_id")`. Paste that UUID into the "Link to Connecta" field on the trip setup screen.
 
 ---
 
