@@ -9,10 +9,10 @@ It works fully standalone for planning, recommendation, tracking, and local hist
 ## Screenshots
 
 <p align ="center">
-  <img src="docs/screenshots/setup.png" width="24%" />
-  <img src="docs/screenshots/plans.png" width="24%" />
-  <img src="docs/screenshots/dashboard.png" width="24%" />
-  <img src="docs/screenshots/history.png" width="24%" />
+  <img src="docs/screenshots/setup.jpeg" width="24%" />
+  <img src="docs/screenshots/plans.jpeg" width="24%" />
+  <img src="docs/screenshots/dashboard.jpeg" width="24%" />
+  <img src="docs/screenshots/history.jpeg" width="24%" />
 </p>
 
 ## Stack
