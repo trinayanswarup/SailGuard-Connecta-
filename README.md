@@ -1,25 +1,24 @@
 # Connecta — Android
 
+**[Download APK](docs/releases/Connecta.apk)** ·
+**[Live Backend](https://connecta-eagq.onrender.com/graphql)** · **[Web App](https://connecta-frontend-one.vercel.app)**
+
 Native Android companion to [Connecta](https://github.com/trinayanswarup/Connecta). The app plans trips, recommends travel data plans, tracks real mobile data usage during active trips, and syncs confirmed plan selections and usage snapshots with the Connecta web app through a shared Go/GraphQL backend.
 
 It works fully standalone for planning, recommendation, tracking, and local history. When linked to a Connecta web session, plan confirmations from either client appear on both, and Android usage snapshots feed a live usage chart on the web.
-
-## Download
-
-**[Download APK](docs/releases/Connecta.apk)** — Android 8.0+ (API 26). Enable "Install from unknown sources" in your device settings before installing.
-
-**[Live Backend](https://connecta-eagq.onrender.com/graphql)** · **[Web App](https://connecta-frontend-one.vercel.app)**
 
 ---
 
 ## Screenshots
 
-<p align ="center">
+<p align="center">
   <img src="docs/screenshots/setup.jpeg" width="24%" />
   <img src="docs/screenshots/plans.jpeg" width="24%" />
   <img src="docs/screenshots/dashboard.jpeg" width="24%" />
   <img src="docs/screenshots/history.jpeg" width="24%" />
 </p>
+
+---
 
 ## Stack
 
@@ -129,6 +128,8 @@ Get the link code from the Connecta web app: open browser console on [connecta-f
 
 The app displays as "Connecta" on the home screen and throughout the UI. The package id (`com.sailguard.app`) and repo name are unchanged — renaming an Android package id touches every file in the namespace for zero user-visible benefit. The technical identity and the brand identity are intentionally different.
 
+---
+
 ## Development notes
 
-CLAUDE.md and AGENTS.md are excluded from this repository. They contain AI coding instructions, Android-specific build quirks (JAVA_HOME, cleartext traffic, emulator IP addressing), and session-specific workflow notes used during active development with Claude Code in Android Studio. They are not useful to anyone reading the codebase and add noise without signal.
+`CLAUDE.md` and `AGENTS.md` are excluded from this repository. They contain AI coding instructions, Android-specific build quirks (JAVA_HOME, cleartext traffic, emulator IP addressing), and session-specific workflow notes used during active development with Claude Code in Android Studio. They are not useful to anyone reading the codebase and add noise without signal.
