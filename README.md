@@ -1,10 +1,14 @@
 # Connecta — Android
 
-**[Live Backend](https://connecta-eagq.onrender.com/graphql)** · **[Web App](https://connecta-frontend-one.vercel.app)**
-
 Native Android companion to [Connecta](https://github.com/trinayanswarup/Connecta). The app plans trips, recommends travel data plans, tracks real mobile data usage during active trips, and syncs confirmed plan selections and usage snapshots with the Connecta web app through a shared Go/GraphQL backend.
 
 It works fully standalone for planning, recommendation, tracking, and local history. When linked to a Connecta web session, plan confirmations from either client appear on both, and Android usage snapshots feed a live usage chart on the web.
+
+## Download
+
+**[Download APK](docs/releases/Connecta.apk)** — Android 8.0+ (API 26). Enable "Install from unknown sources" in your device settings before installing.
+
+**[Live Backend](https://connecta-eagq.onrender.com/graphql)** · **[Web App](https://connecta-frontend-one.vercel.app)**
 
 ---
 
