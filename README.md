@@ -132,4 +132,5 @@ The app displays as "Connecta" on the home screen and throughout the UI. The pac
 
 ## Development notes
 
-`CLAUDE.md` and `AGENTS.md` are excluded from this repository. They contain AI coding instructions, Android-specific build quirks (JAVA_HOME, cleartext traffic, emulator IP addressing), and session-specific workflow notes used during active development with Claude Code in Android Studio. They are not useful to anyone reading the codebase and add noise without signal.
+Detailed planning docs (CLAUDE.md, PRD.md, AGENTS.md) are kept private. They contain AI coding instructions, internal build quirks, and session-specific workflow notes used during active development with Claude Code.
+Public versions are committed for reference.
